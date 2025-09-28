@@ -16,6 +16,10 @@
       {
         "menuName": "createEventsOnCalendar",
         "functionName": "createEventsOnCalendar"
+      },
+      {
+        "menuName": "onOpenAgendamentosCreate",
+        "functionName": "onOpenAgendamentosCreate"
       }
     ]
   },

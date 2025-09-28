@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <base target="_top" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Registro de Agendamentos</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- jQuery via CDN -->
+    <script
+      src="https://code.jquery.com/jquery-3.7.1.slim.min.js"
+      integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8="
+      crossorigin="anonymous"
+    ></script>
+    <!-- jQuery Mask Plugin -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+  </head>
+
+  <body class="bg-gray-100 font-sans leading-normal p-6">
+    <div
+      class="mx-auto p-6 bg-white shadow-lg rounded-lg mt-10 w-full max-w-4xl"
+    >
+      <h1 class="text-2xl font-bold mb-6 text-center">
+        REGISTRO DE AGENDAMENTOS
+      </h1>
+
+      <form id="appointmentForm" class="space-y-6">
+        <!-- Projeto/Cliente -->
+        <div>
+          <label for="projectId" class="block text-gray-700">
+            Projeto <span class="text-red-500">*</span>
+          </label>
+          <select
+            id="projectId"
+            name="projectId"
+            required
+            class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="" disabled selected>Selecione o Projeto</option>
+          </select>
+          <p class="text-xs text-gray-500 mt-1">
+            Selecione o projeto aprovado para o qual deseja criar um
+            agendamento.
+          </p>
+        </div>
+
+        <!-- Resumo do Projeto (auto-preenchido) -->
+        <div
+          id="projectSummary"
+          class="grid grid-cols-1 md:grid-cols-3 gap-4 hidden bg-gray-50 p-4 rounded-md"
+        >
+          <div>
+            <label for="summaryClientName" class="block text-gray-700"
+              >Nome do Cliente</label
+            >
+            <input
+              id="summaryClientName"
+              class="mt-1 w-full bg-gray-100 border-gray-300 rounded-md shadow-sm"
+              readonly
+            />
+          </div>
+          <div>
+            <label for="summaryProjectNumber" class="block text-gray-700"
+              >Número do Projeto</label
+            >
+            <input
+              id="summaryProjectNumber"
+              class="mt-1 w-full bg-gray-100 border-gray-300 rounded-md shadow-sm"
+              readonly
+            />
+          </div>
+          <div>
+            <label for="summaryProjectName" class="block text-gray-700"
+              >Nome da Obra</label
+            >
+            <input
+              id="summaryProjectName"
+              class="mt-1 w-full bg-gray-100 border-gray-300 rounded-md shadow-sm"
+              readonly
+            />
+          </div>
+        </div>
+
+        <!-- Etapa do Projeto -->
+        <div>
+          <label for="projectStep" class="block text-gray-700">
+            Etapa do Projeto <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            id="projectStep"
+            name="projectStep"
+            required
+            placeholder="Ex: 1, 2, 3, etc."
+            class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+          />
+          <p class="text-xs text-gray-500 mt-1">
+            Descreva qual etapa do projeto será executada neste agendamento.
+          </p>
+        </div>
+
+        <!-- Descrição do Agendamento -->
+        <div>
+          <label for="appointmentDescription" class="block text-gray-700">
+            Descrição do Serviço/Agendamento <span class="text-red-500">*</span>
+          </label>
+          <textarea
+            id="appointmentDescription"
+            name="appointmentDescription"
+            required
+            rows="3"
+            placeholder="Descreva detalhadamente o serviço a ser executado..."
+            class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+          ></textarea>
+          <p class="text-xs text-gray-500 mt-1">
+            Forneça uma descrição clara do que será realizado no agendamento.
+          </p>
+        </div>
+
+        <!-- Equipe Responsável -->
+        <div>
+          <label for="teamName" class="block text-gray-700">
+            Equipe Responsável <span class="text-red-500">*</span>
+          </label>
+          <select
+            id="teamName"
+            name="teamName"
+            required
+            class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="" disabled selected>Selecione a Equipe</option>
+          </select>
+          <p class="text-xs text-gray-500 mt-1">
+            Equipe que será responsável pela execução do serviço.
+          </p>
+        </div>
+
+        <!-- Data e Horário -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label for="appointmentStartTime" class="block text-gray-700">
+              Data e Hora de Início <span class="text-red-500">*</span>
+            </label>
+            <input
+              type="datetime-local"
+              id="appointmentStartTime"
+              name="appointmentStartTime"
+              required
+              class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          <div>
+            <label for="appointmentEndTime" class="block text-gray-700">
+              Data e Hora de Término <span class="text-red-500">*</span>
+            </label>
+            <input
+              type="datetime-local"
+              id="appointmentEndTime"
+              name="appointmentEndTime"
+              required
+              class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+        </div>
+
+        <!-- Endereço -->
+        <div>
+          <label for="address" class="block text-gray-700">
+            Endereço <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            id="address"
+            name="address"
+            required
+            placeholder="Endereço completo para o agendamento"
+            class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+          />
+          <div id="addressValidation" class="mt-2 hidden">
+            <div class="flex items-center space-x-2">
+              <div
+                id="addressValidationSpinner"
+                class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 hidden"
+              ></div>
+              <span id="addressValidationText" class="text-sm"></span>
+            </div>
+          </div>
+          <p class="text-xs text-gray-500 mt-1">
+            Forneça o endereço completo onde o serviço será executado. O
+            endereço será validado automaticamente.
+          </p>
+        </div>
+
+        <!-- Telefone -->
+        <div>
+          <label for="phone" class="block text-gray-700">
+            Telefone de Contato <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="tel"
+            id="phone"
+            name="phone"
+            required
+            placeholder="(00) 00000-0000"
+            class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+          />
+          <p class="text-xs text-gray-500 mt-1">
+            Número de telefone para contato relacionado ao agendamento.
+          </p>
+        </div>
+
+        <!-- Status de Validação -->
+        <div class="bg-blue-50 p-4 rounded-md">
+          <h3 class="text-sm font-semibold text-blue-800 mb-2">
+            Status do Formulário
+          </h3>
+          <div id="validationStatus" class="text-sm text-blue-700">
+            Preencha todos os campos obrigatórios para habilitar o envio.
+          </div>
+        </div>
+
+        <!-- Ações -->
+        <div class="flex items-center justify-between pt-4 border-t">
+          <button
+            type="button"
+            id="clearBtn"
+            class="px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+          >
+            Limpar Formulário
+          </button>
+          <button
+            type="submit"
+            id="submitBtn"
+            class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled
+          >
+            Criar Agendamento
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div
+      id="loadingOverlay"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50"
+    >
+      <div class="bg-white p-6 rounded-lg shadow-lg">
+        <div class="flex items-center space-x-3">
+          <div
+            class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"
+          ></div>
+          <span class="text-gray-700">Criando agendamento...</span>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      $(document).ready(function () {
+        // Elementos do DOM
+        const $submitBtn = $("#submitBtn");
+        const $clearBtn = $("#clearBtn");
+        const $projectId = $("#projectId");
+        const $projectSummary = $("#projectSummary");
+        const $summaryClientName = $("#summaryClientName");
+        const $summaryProjectNumber = $("#summaryProjectNumber");
+        const $summaryProjectName = $("#summaryProjectName");
+        const $projectStep = $("#projectStep");
+        const $appointmentDescription = $("#appointmentDescription");
+        const $teamName = $("#teamName");
+        const $appointmentStartTime = $("#appointmentStartTime");
+        const $appointmentEndTime = $("#appointmentEndTime");
+        const $address = $("#address");
+        const $phone = $("#phone");
+        const $validationStatus = $("#validationStatus");
+        const $loadingOverlay = $("#loadingOverlay");
+        const $addressValidation = $("#addressValidation");
+        const $addressValidationSpinner = $("#addressValidationSpinner");
+        const $addressValidationText = $("#addressValidationText");
+
+        // Variável para armazenar dados de presets
+        let presets = null;
+        let addressValidationTimeout = null;
+        let isAddressValid = false;
+
+        // Aplicar máscaras
+        $phone.mask("(00) 00000-0000");
+
+        // Função para mostrar/esconder loading
+        function showLoading(show = true, message = "Processando...") {
+          if (show) {
+            $loadingOverlay.find("span").text(message);
+            $loadingOverlay.removeClass("hidden");
+          } else {
+            $loadingOverlay.addClass("hidden");
+          }
+        }
+
+        // Função para validar endereço
+        function validateAddress(address) {
+          if (!address || address.trim().length < 10) {
+            hideAddressValidation();
+            return;
+          }
+
+          showAddressValidation("Validando endereço...", "validating");
+
+          google.script.run
+            .withSuccessHandler((isValid) => {
+              isAddressValid = isValid;
+              if (isValid) {
+                showAddressValidation("✓ Endereço válido", "valid");
+              } else {
+                showAddressValidation(
+                  "⚠ Endereço pode não ser válido no Google Maps",
+                  "warning"
+                );
+              }
+              validateForm();
+            })
+            .withFailureHandler(() => {
+              isAddressValid = false;
+              showAddressValidation("Erro ao validar endereço", "error");
+              validateForm();
+            })
+            .validateAddress(address);
+        }
+
+        function showAddressValidation(text, type) {
+          $addressValidation.removeClass("hidden");
+          $addressValidationText.text(text);
+
+          // Reset classes
+          $addressValidationText.removeClass(
+            "text-blue-600 text-green-600 text-yellow-600 text-red-600"
+          );
+
+          if (type === "validating") {
+            $addressValidationSpinner.removeClass("hidden");
+            $addressValidationText.addClass("text-blue-600");
+          } else {
+            $addressValidationSpinner.addClass("hidden");
+            if (type === "valid") {
+              $addressValidationText.addClass("text-green-600");
+            } else if (type === "warning") {
+              $addressValidationText.addClass("text-yellow-600");
+            } else if (type === "error") {
+              $addressValidationText.addClass("text-red-600");
+            }
+          }
+        }
+
+        function hideAddressValidation() {
+          $addressValidation.addClass("hidden");
+          $addressValidationSpinner.addClass("hidden");
+          isAddressValid = false;
+        }
+
+        // Função para validar formulário
+        function validateForm() {
+          const isValid = !!(
+            $projectId.val() &&
+            $projectStep.val() &&
+            $appointmentDescription.val() &&
+            $teamName.val() &&
+            $appointmentStartTime.val() &&
+            $appointmentEndTime.val() &&
+            $address.val() &&
+            $phone.val()
+          );
+
+          // Validar se data de término é após data de início
+          let timeValid = true;
+          if ($appointmentStartTime.val() && $appointmentEndTime.val()) {
+            const startTime = new Date($appointmentStartTime.val());
+            const endTime = new Date($appointmentEndTime.val());
+            timeValid = endTime > startTime;
+          }
+
+          const finalValid = isValid && timeValid;
+          $submitBtn.prop("disabled", !finalValid);
+
+          if (finalValid) {
+            $validationStatus
+              .text("Formulário válido - pronto para envio!")
+              .removeClass("text-blue-700")
+              .addClass("text-green-700");
+          } else if (!timeValid) {
+            $validationStatus
+              .text("Data e hora de término deve ser posterior ao início.")
+              .removeClass("text-blue-700 text-green-700")
+              .addClass("text-red-700");
+          } else {
+            $validationStatus
+              .text(
+                "Preencha todos os campos obrigatórios para habilitar o envio."
+              )
+              .removeClass("text-green-700 text-red-700")
+              .addClass("text-blue-700");
+          }
+
+          return finalValid;
+        }
+
+        // Função para limpar formulário
+        function clearForm() {
+          $("#appointmentForm")[0].reset();
+          $projectSummary.addClass("hidden");
+          hideAddressValidation();
+          validateForm();
+        }
+
+        // Carregar presets do backend
+        function loadPresets() {
+          showLoading(true, "Carregando dados do sistema...");
+
+          google.script.run
+            .withSuccessHandler((data) => {
+              presets = data;
+
+              // Preencher dropdown de projetos
+              if (data.projects && data.projects.length > 0) {
+                data.projects.forEach((project) => {
+                  $projectId.append(
+                    `<option value="${project.id}">${project.label}</option>`
+                  );
+                });
+              }
+
+              // Preencher dropdown de equipes
+              if (data.teams && data.teams.length > 0) {
+                data.teams.forEach((team) => {
+                  $teamName.append(`<option value="${team}">${team}</option>`);
+                });
+              }
+
+              showLoading(false);
+              validateForm();
+            })
+            .withFailureHandler((error) => {
+              console.error("Erro ao carregar presets:", error);
+              showLoading(false);
+              alert(
+                "Erro ao carregar dados do sistema. Tente recarregar a página."
+              );
+            })
+            .getAppointmentPresets();
+        }
+
+        // Event Listeners
+        $projectId.on("change", function () {
+          const projectId = $(this).val();
+          if (!projectId || !presets || !presets.projects) return;
+
+          const selectedProject = presets.projects.find(
+            (p) => p.id === projectId
+          );
+          if (selectedProject) {
+            $summaryClientName.val(selectedProject.clientName || "");
+            $summaryProjectNumber.val(selectedProject.projectNumber || "");
+            $summaryProjectName.val(selectedProject.projectName || "");
+            $address.val(selectedProject.address || "");
+            $phone.val(selectedProject.phone || "");
+            $projectSummary.removeClass("hidden");
+
+            // Validar endereço automaticamente se preenchido
+            if (selectedProject.address) {
+              validateAddress(selectedProject.address);
+            }
+          } else {
+            $projectSummary.addClass("hidden");
+            hideAddressValidation();
+          }
+
+          validateForm();
+        });
+
+        // Validação de endereço com debounce
+        $address.on("input", function () {
+          const address = $(this).val();
+
+          if (addressValidationTimeout) {
+            clearTimeout(addressValidationTimeout);
+          }
+
+          addressValidationTimeout = setTimeout(() => {
+            validateAddress(address);
+          }, 1000);
+        });
+
+        // Validação em tempo real
+        $projectStep.on("input", validateForm);
+        $appointmentDescription.on("input", validateForm);
+        $teamName.on("change", validateForm);
+        $appointmentStartTime.on("change", validateForm);
+        $appointmentEndTime.on("change", validateForm);
+        $phone.on("input", validateForm);
+
+        // Botão limpar
+        $clearBtn.on("click", function () {
+          if (confirm("Tem certeza que deseja limpar todos os campos?")) {
+            clearForm();
+          }
+        });
+
+        // Submit do formulário
+        $("#appointmentForm").on("submit", function (e) {
+          e.preventDefault();
+
+          if (!validateForm()) {
+            alert("Por favor, preencha todos os campos obrigatórios.");
+            return;
+          }
+
+          $submitBtn.prop("disabled", true);
+          showLoading(true, "Criando agendamento...");
+
+          // Preparar dados para envio
+          const formData = {
+            projectId: $projectId.val(),
+            clientName: $summaryClientName.val(),
+            projectNumber: $summaryProjectNumber.val(),
+            projectName: $summaryProjectName.val(),
+            projectStep: $projectStep.val(),
+            appointmentDescription: $appointmentDescription.val(),
+            teamName: $teamName.val(),
+            appointmentStartTime: $appointmentStartTime.val(),
+            appointmentEndTime: $appointmentEndTime.val(),
+            address: $address.val(),
+            phone: $phone.val(),
+            isAddressValid: isAddressValid,
+          };
+
+          // Enviar dados para o backend
+          google.script.run
+            .withSuccessHandler((result) => {
+              showLoading(false);
+              alert(
+                `Agendamento criado com sucesso!\nID: ${result.appointmentId}\nEvento criado no Google Agenda: ${result.calendarName}`
+              );
+              clearForm();
+            })
+            .withFailureHandler((error) => {
+              console.error("Erro ao salvar:", error);
+              alert(`Erro ao criar agendamento:\n${error.message || error}`);
+              showLoading(false);
+              $submitBtn.prop("disabled", false);
+            })
+            .saveAppointmentRecord(formData);
+        });
+
+        // Inicializar aplicação
+        loadPresets();
+      });
+    </script>
+  </body>
+</html>
