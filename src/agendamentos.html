@@ -280,6 +280,7 @@
         const $addressValidationText = $("#addressValidationText");
 
         // Variável para armazenar dados de presets
+        let projectObs = "SEM OBSERVAÇÕES DE PROJETO";
         let presets = null;
         let addressValidationTimeout = null;
         let isAddressValid = false;
@@ -463,6 +464,7 @@
             $address.val(selectedProject.address || "");
             $phone.val(selectedProject.phone || "");
             $projectSummary.removeClass("hidden");
+            projectObs = selectedProject.projectObs;
 
             // Validar endereço automaticamente se preenchido
             if (selectedProject.address) {
@@ -530,6 +532,7 @@
             address: $address.val(),
             phone: $phone.val(),
             isAddressValid: isAddressValid,
+            projectObs,
           };
 
           // Enviar dados para o backend

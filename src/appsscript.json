@@ -20,6 +20,18 @@
       {
         "menuName": "onOpenAgendamentosCreate",
         "functionName": "onOpenAgendamentosCreate"
+      },
+      {
+        "menuName": "onOpenAgendamentosStatus",
+        "functionName": "onOpenAgendamentosStatus"
+      },
+      {
+        "menuName": "onOpenAgendamentosFeedback",
+        "functionName": "onOpenAgendamentosFeedback"
+      },
+      {
+        "menuName": "promptDeleteAppointment",
+        "functionName": "promptDeleteAppointment"
       }
     ]
   },

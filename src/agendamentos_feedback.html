@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <base target="_top" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Feedback de Projetos - Agendamentos</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- jQuery via CDN -->
+    <script
+      src="https://code.jquery.com/jquery-3.7.1.slim.min.js"
+      integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8="
+      crossorigin="anonymous"
+    ></script>
+  </head>
+
+  <body class="bg-gray-100 font-sans leading-normal p-6">
+    <div
+      class="mx-auto p-6 bg-white shadow-lg rounded-lg mt-10 w-full max-w-6xl"
+    >
+      <h1 class="text-2xl font-bold mb-6 text-center">
+        FEEDBACK DE PROJETOS - AGENDAMENTOS
+      </h1>
+
+      <!-- Filtros e Busca -->
+      <div class="mb-6 bg-gray-50 p-4 rounded-lg">
+        <h2 class="text-lg font-semibold mb-4">Filtros</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label for="searchFilter" class="block text-gray-700">
+              Buscar por ID ou Nome
+            </label>
+            <input
+              type="text"
+              id="searchFilter"
+              placeholder="Digite ID do agendamento, nome do cliente ou projeto..."
+              class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          <div>
+            <label for="feedbackFilter" class="block text-gray-700">
+              Filtrar por Feedback
+            </label>
+            <select
+              id="feedbackFilter"
+              class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">Todos os Feedbacks</option>
+              <option value="POSITIVO">Positivo</option>
+              <option value="NEGATIVO">Negativo</option>
+              <option value="SEM RETORNO">Sem Retorno</option>
+              <option value="">Pendente</option>
+            </select>
+          </div>
+          <div>
+            <label for="teamFilter" class="block text-gray-700">
+              Filtrar por Equipe
+            </label>
+            <select
+              id="teamFilter"
+              class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">Todas as Equipes</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lista de Agendamentos -->
+      <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="bg-gray-50 px-6 py-3 border-b">
+          <h3 class="text-lg font-medium">Agendamentos para Feedback</h3>
+          <p class="text-sm text-gray-500" id="appointmentCount">
+            Carregando agendamentos...
+          </p>
+          <div class="mt-2 bg-blue-50 border border-blue-200 rounded p-2">
+            <p class="text-xs text-blue-700">
+              <strong>ℹ️ Importante:</strong> Apenas agendamentos com status
+              "ENVIADO" podem receber feedback.
+            </p>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  ID / Projeto
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Cliente / Equipe
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Data do Agendamento
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Feedback Atual
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Data do Feedback
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Ações
+                </th>
+              </tr>
+            </thead>
+            <tbody
+              id="appointmentsTableBody"
+              class="bg-white divide-y divide-gray-200"
+            >
+              <!-- Dados serão inseridos dinamicamente -->
+            </tbody>
+          </table>
+        </div>
+
+        <div id="noAppointments" class="hidden p-6 text-center text-gray-500">
+          <p class="text-lg">Nenhum agendamento encontrado.</p>
+          <p class="text-sm">
+            Ajuste os filtros ou verifique se há agendamentos com status
+            "ENVIADO".
+          </p>
+        </div>
+      </div>
+
+      <!-- Modal de Feedback -->
+      <div
+        id="feedbackModal"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50"
+      >
+        <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+          <h3 class="text-lg font-semibold mb-4">
+            Registrar Feedback do Projeto
+          </h3>
+
+          <form id="feedbackForm">
+            <input type="hidden" id="modalAppointmentId" />
+            <input type="hidden" id="modalProjectId" />
+
+            <!-- Informações do Agendamento -->
+            <div class="mb-4 bg-gray-50 p-3 rounded">
+              <div class="text-sm">
+                <p><strong>ID:</strong> <span id="modalDisplayId"></span></p>
+                <p>
+                  <strong>Cliente:</strong>
+                  <span id="modalDisplayClient"></span>
+                </p>
+                <p>
+                  <strong>Projeto:</strong>
+                  <span id="modalDisplayProject"></span>
+                </p>
+              </div>
+            </div>
+
+            <!-- Tipo de Feedback -->
+            <div class="mb-4">
+              <label for="feedbackType" class="block text-gray-700">
+                Tipo de Feedback <span class="text-red-500">*</span>
+              </label>
+              <select
+                id="feedbackType"
+                name="feedbackType"
+                required
+                class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">Selecione o feedback</option>
+                <option value="POSITIVO">POSITIVO</option>
+                <option value="NEGATIVO">NEGATIVO</option>
+                <option value="SEM RETORNO">SEM RETORNO</option>
+              </select>
+            </div>
+
+            <!-- ID do Agendamento de Retorno (só para feedback negativo) -->
+            <div id="returnAppointmentSection" class="mb-4 hidden">
+              <label for="returnAppointmentId" class="block text-gray-700">
+                ID do Novo Agendamento (Retorno)
+                <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="returnAppointmentId"
+                name="returnAppointmentId"
+                placeholder="AGT-xxxxxxxx"
+                pattern="^AGT-[a-fA-F0-9]{8}$"
+                class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+              />
+              <p class="text-xs text-gray-500 mt-1">
+                Informe o ID do novo agendamento criado para retorno
+                (obrigatório para feedback negativo).
+              </p>
+            </div>
+
+            <!-- Observações -->
+            <div class="mb-4">
+              <label for="feedbackObservations" class="block text-gray-700">
+                Observações
+              </label>
+              <textarea
+                id="feedbackObservations"
+                name="feedbackObservations"
+                rows="3"
+                placeholder="Observações sobre o feedback (opcional)..."
+                class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+              ></textarea>
+            </div>
+
+            <!-- Informações Automáticas -->
+            <div class="mb-4 bg-blue-50 p-3 rounded text-sm">
+              <h4 class="font-semibold text-blue-800 mb-2">
+                Informações Automáticas:
+              </h4>
+              <ul class="text-blue-700 space-y-1">
+                <li>
+                  • Data do feedback: registrada automaticamente ao salvar
+                </li>
+                <li>
+                  • Data de retorno: registrada quando ID de retorno é informado
+                </li>
+                <li>
+                  • Data de finalização: preenchida conforme regras do sistema
+                </li>
+                <li>
+                  • <strong>Restrição:</strong> Apenas agendamentos com status
+                  "ENVIADO" podem receber feedback
+                </li>
+              </ul>
+            </div>
+
+            <!-- Ações do Modal -->
+            <div class="flex items-center justify-between pt-4 border-t">
+              <button
+                type="button"
+                id="cancelModalBtn"
+                class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                id="saveFeedbackBtn"
+                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                disabled
+              >
+                Salvar Feedback
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div
+      id="loadingOverlay"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50"
+    >
+      <div class="bg-white p-6 rounded-lg shadow-lg">
+        <div class="flex items-center space-x-3">
+          <div
+            class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"
+          ></div>
+          <span class="text-gray-700">Processando...</span>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      $(document).ready(function () {
+        // Elementos do DOM
+        const $searchFilter = $("#searchFilter");
+        const $feedbackFilter = $("#feedbackFilter");
+        const $teamFilter = $("#teamFilter");
+        const $appointmentsTableBody = $("#appointmentsTableBody");
+        const $appointmentCount = $("#appointmentCount");
+        const $noAppointments = $("#noAppointments");
+        const $feedbackModal = $("#feedbackModal");
+        const $feedbackForm = $("#feedbackForm");
+        const $loadingOverlay = $("#loadingOverlay");
+        const $feedbackType = $("#feedbackType");
+        const $returnAppointmentSection = $("#returnAppointmentSection");
+        const $returnAppointmentId = $("#returnAppointmentId");
+        const $saveFeedbackBtn = $("#saveFeedbackBtn");
+        const $cancelModalBtn = $("#cancelModalBtn");
+
+        // Variáveis globais
+        let allAppointments = null;
+        let filteredAppointments = [];
+        let teams = [];
+        let listenersConfigured = false;
+
+        // Função para mostrar/esconder loading
+        function showLoading(show = true, message = "Processando...") {
+          if (show) {
+            $loadingOverlay.find("span").text(message);
+            $loadingOverlay.removeClass("hidden");
+          } else {
+            $loadingOverlay.addClass("hidden");
+          }
+        }
+
+        // Função para carregar agendamentos
+        function loadAppointments() {
+          showLoading(true, "Carregando agendamentos...");
+
+          google.script.run
+            .withSuccessHandler((data) => {
+              try {
+                allAppointments = data || [];
+                setupEventListeners();
+                applyFilters();
+              } catch (error) {
+                console.error("Erro ao carregar agendamentos:", error);
+                filteredAppointments = [];
+                alert(
+                  "Erro ao carregar agendamentos. Tente recarregar a página."
+                );
+              } finally {
+                showLoading(false);
+              }
+            })
+            .withFailureHandler((error) => {
+              console.error("Erro ao carregar agendamentos:", error);
+              allAppointments = [];
+              filteredAppointments = [];
+              showLoading(false);
+              alert(
+                "Erro ao carregar agendamentos. Tente recarregar a página."
+              );
+              renderAppointments();
+            })
+            .getAppointmentsForFeedback();
+        }
+
+        // Função para carregar equipes para o filtro
+        function loadTeams() {
+          google.script.run
+            .withSuccessHandler((data) => {
+              teams = data.teams || [];
+              teams.forEach((team) => {
+                $teamFilter.append(`<option value="${team}">${team}</option>`);
+              });
+            })
+            .withFailureHandler((error) => {
+              console.error("Erro ao carregar equipes:", error);
+            })
+            .getPresets();
+        }
+
+        // Função para aplicar filtros
+        function applyFilters() {
+          // Verificar se os dados foram carregados
+          if (!allAppointments || !Array.isArray(allAppointments)) {
+            console.log("Dados ainda não carregados, ignorando filtros");
+            return;
+          }
+
+          const searchTerm = $searchFilter.val().toLowerCase();
+          const feedbackFilter = $feedbackFilter.val();
+          const teamFilter = $teamFilter.val();
+
+          filteredAppointments = allAppointments.filter((appointment) => {
+            const matchesSearch =
+              !searchTerm ||
+              appointment.appointmentId.toLowerCase().includes(searchTerm) ||
+              appointment.clientName.toLowerCase().includes(searchTerm) ||
+              appointment.projectName.toLowerCase().includes(searchTerm) ||
+              appointment.projectNumber.toLowerCase().includes(searchTerm);
+
+            const matchesFeedback =
+              !feedbackFilter || appointment.projectFeedback === feedbackFilter;
+            const matchesTeam =
+              !teamFilter || appointment.teamName === teamFilter;
+
+            return matchesSearch && matchesFeedback && matchesTeam;
+          });
+
+          renderAppointments();
+        }
+
+        // Função para renderizar agendamentos
+        function renderAppointments() {
+          $appointmentsTableBody.empty();
+
+          if (
+            !filteredAppointments ||
+            !Array.isArray(filteredAppointments) ||
+            filteredAppointments.length === 0
+          ) {
+            $noAppointments.removeClass("hidden");
+            $appointmentCount.text("Nenhum agendamento encontrado.");
+            return;
+          }
+
+          $noAppointments.addClass("hidden");
+          $appointmentCount.text(
+            `${filteredAppointments.length} agendamento(s) encontrado(s)`
+          );
+
+          filteredAppointments.forEach((appointment) => {
+            const startDate = appointment.appointmentStartTime
+              ? new Date(appointment.appointmentStartTime).toLocaleDateString(
+                  "pt-BR"
+                )
+              : "N/A";
+            const startTime = appointment.appointmentStartTime
+              ? new Date(appointment.appointmentStartTime).toLocaleTimeString(
+                  "pt-BR",
+                  { hour: "2-digit", minute: "2-digit" }
+                )
+              : "";
+
+            const feedbackClass = getFeedbackClass(appointment.projectFeedback);
+            const feedbackDate = appointment.projectFeedbackDate
+              ? new Date(appointment.projectFeedbackDate).toLocaleDateString(
+                  "pt-BR"
+                )
+              : "N/A";
+
+            const row = `
+              <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-gray-900">${
+                    appointment.appointmentId
+                  }</div>
+                  <div class="text-sm text-gray-500">${
+                    appointment.projectNumber || "N/A"
+                  }</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-gray-900">${
+                    appointment.clientName
+                  }</div>
+                  <div class="text-sm text-gray-500">${
+                    appointment.teamName
+                  }</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">${startDate}</div>
+                  <div class="text-sm text-gray-500">${startTime}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${feedbackClass}">
+                    ${appointment.projectFeedback || "PENDENTE"}
+                  </span>
+                  ${
+                    appointment.projectReturnFeedback
+                      ? `<div class="text-xs text-gray-500 mt-1">Retorno: ${appointment.projectReturnFeedback}</div>`
+                      : ""
+                  }
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">${feedbackDate}</div>
+                  ${
+                    appointment.projectFeedbackReturnDate
+                      ? `<div class="text-xs text-gray-500">Retorno: ${new Date(
+                          appointment.projectFeedbackReturnDate
+                        ).toLocaleDateString("pt-BR")}</div>`
+                      : ""
+                  }
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <button
+                    onclick="openFeedbackModal('${
+                      appointment.appointmentId
+                    }', '${appointment.projectId}', '${
+              appointment.clientName
+            }', '${appointment.projectName}')"
+                    class="text-blue-600 hover:text-blue-900 mr-2"
+                  >
+                    ${
+                      appointment.projectFeedback ? "Editar" : "Registrar"
+                    } Feedback
+                  </button>
+                </td>
+              </tr>
+            `;
+            $appointmentsTableBody.append(row);
+          });
+        }
+
+        // Função para obter classe CSS do feedback
+        function getFeedbackClass(feedback) {
+          switch (feedback) {
+            case "POSITIVO":
+              return "bg-green-100 text-green-800";
+            case "NEGATIVO":
+              return "bg-red-100 text-red-800";
+            case "SEM RETORNO":
+              return "bg-yellow-100 text-yellow-800";
+            default:
+              return "bg-gray-100 text-gray-800";
+          }
+        }
+
+        // Função para abrir modal de feedback
+        window.openFeedbackModal = function (
+          appointmentId,
+          projectId,
+          clientName,
+          projectName
+        ) {
+          $("#modalAppointmentId").val(appointmentId);
+          $("#modalProjectId").val(projectId);
+          $("#modalDisplayId").text(appointmentId);
+          $("#modalDisplayClient").text(clientName);
+          $("#modalDisplayProject").text(projectName);
+
+          // Buscar dados atuais do feedback se existir
+          const appointment = allAppointments.find(
+            (a) => a.appointmentId === appointmentId
+          );
+          if (appointment && appointment.projectFeedback) {
+            $feedbackType.val(appointment.projectFeedback);
+            $("#feedbackObservations").val(appointment.obs || "");
+            if (appointment.projectReturnFeedback) {
+              $returnAppointmentId.val(appointment.projectReturnFeedback);
+            }
+            toggleReturnSection();
+          } else {
+            // Limpar formulário
+            $feedbackForm[0].reset();
+            $("#modalAppointmentId").val(appointmentId);
+            $("#modalProjectId").val(projectId);
+            $returnAppointmentSection.addClass("hidden");
+          }
+
+          validateFeedbackForm();
+          $feedbackModal.removeClass("hidden");
+        };
+
+        // Função para mostrar/esconder seção de retorno
+        function toggleReturnSection() {
+          if ($feedbackType.val() === "NEGATIVO") {
+            $returnAppointmentSection.removeClass("hidden");
+            $returnAppointmentId.prop("required", true);
+          } else {
+            $returnAppointmentSection.addClass("hidden");
+            $returnAppointmentId.prop("required", false);
+            $returnAppointmentId.val("");
+          }
+          validateFeedbackForm();
+        }
+
+        // Função para validar formulário de feedback
+        function validateFeedbackForm() {
+          const feedbackType = $feedbackType.val();
+          const returnId = $returnAppointmentId.val();
+
+          let isValid = feedbackType !== "";
+
+          // Se feedback é negativo, validar ID de retorno
+          if (feedbackType === "NEGATIVO") {
+            isValid =
+              isValid &&
+              returnId !== "" &&
+              /^AGT-[a-fA-F0-9]{8}$/.test(returnId);
+          }
+
+          $saveFeedbackBtn.prop("disabled", !isValid);
+          return isValid;
+        }
+
+        // Função para configurar event listeners
+        function setupEventListeners() {
+          if (listenersConfigured) return;
+
+          $searchFilter.on("input", applyFilters);
+          $feedbackFilter.on("change", applyFilters);
+          $teamFilter.on("change", applyFilters);
+          $feedbackType.on("change", function () {
+            toggleReturnSection();
+            validateFeedbackForm();
+          });
+          $returnAppointmentId.on("input", validateFeedbackForm);
+
+          listenersConfigured = true;
+        }
+
+        // Fechar modal
+        $cancelModalBtn.on("click", function () {
+          $feedbackModal.addClass("hidden");
+        });
+
+        // Submit do formulário de feedback
+        $feedbackForm.on("submit", function (e) {
+          e.preventDefault();
+
+          if (!validateFeedbackForm()) {
+            alert("Por favor, preencha todos os campos obrigatórios.");
+            return;
+          }
+
+          $saveFeedbackBtn.prop("disabled", true);
+          showLoading(true, "Salvando feedback...");
+
+          const feedbackData = {
+            appointmentId: $("#modalAppointmentId").val(),
+            projectId: $("#modalProjectId").val(),
+            feedbackType: $feedbackType.val(),
+            returnAppointmentId: $returnAppointmentId.val() || null,
+            observations: $("#feedbackObservations").val() || "",
+          };
+
+          google.script.run
+            .withSuccessHandler((result) => {
+              showLoading(false);
+              alert(
+                `Feedback registrado com sucesso!\nID: ${result.appointmentId}\nFeedback: ${result.feedbackType}`
+              );
+              $feedbackModal.addClass("hidden");
+              loadAppointments(); // Recarregar dados
+            })
+            .withFailureHandler((error) => {
+              console.error("Erro ao salvar feedback:", error);
+              alert(`Erro ao salvar feedback:\n${error.message || error}`);
+              showLoading(false);
+              $saveFeedbackBtn.prop("disabled", false);
+            })
+            .saveProjectFeedback(feedbackData);
+        });
+
+        // Inicializar aplicação
+        loadAppointments();
+        loadTeams();
+      });
+    </script>
+  </body>
+</html>

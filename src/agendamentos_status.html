@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <base target="_top" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Atualização de Status - Agendamentos</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- jQuery via CDN -->
+    <script
+      src="https://code.jquery.com/jquery-3.7.1.slim.min.js"
+      integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8="
+      crossorigin="anonymous"
+    ></script>
+  </head>
+
+  <body class="bg-gray-100 font-sans leading-normal p-6">
+    <div
+      class="mx-auto p-6 bg-white shadow-lg rounded-lg mt-10 w-full max-w-6xl"
+    >
+      <h1 class="text-2xl font-bold mb-6 text-center">
+        ATUALIZAÇÃO DE STATUS - AGENDAMENTOS
+      </h1>
+
+      <!-- Filtros e Busca -->
+      <div class="mb-6 bg-gray-50 p-4 rounded-lg">
+        <h2 class="text-lg font-semibold mb-4">Filtros</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label for="searchFilter" class="block text-gray-700">
+              Buscar por ID ou Nome
+            </label>
+            <input
+              type="text"
+              id="searchFilter"
+              placeholder="Digite ID do agendamento, nome do cliente ou projeto..."
+              class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          <div>
+            <label for="statusFilter" class="block text-gray-700">
+              Filtrar por Status
+            </label>
+            <select
+              id="statusFilter"
+              class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">Todos os Status</option>
+              <option value="ENVIADO">Enviado</option>
+            </select>
+          </div>
+          <div>
+            <label for="teamFilter" class="block text-gray-700">
+              Filtrar por Equipe
+            </label>
+            <select
+              id="teamFilter"
+              class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">Todas as Equipes</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lista de Agendamentos -->
+      <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="bg-gray-50 px-6 py-3 border-b">
+          <h3 class="text-lg font-medium">Agendamentos Cadastrados</h3>
+          <p class="text-sm text-gray-500" id="appointmentCount">
+            Carregando agendamentos...
+          </p>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  ID / Projeto
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Cliente / Equipe
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Data do Agendamento
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Status Atual
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Prazo Limite
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Ações
+                </th>
+              </tr>
+            </thead>
+            <tbody
+              id="appointmentsTableBody"
+              class="bg-white divide-y divide-gray-200"
+            >
+              <!-- Dados serão inseridos dinamicamente -->
+            </tbody>
+          </table>
+        </div>
+
+        <div id="noAppointments" class="hidden p-6 text-center text-gray-500">
+          <p class="text-lg">Nenhum agendamento encontrado.</p>
+          <p class="text-sm">
+            Ajuste os filtros ou cadastre novos agendamentos.
+          </p>
+        </div>
+      </div>
+
+      <!-- Modal de Atualização de Status -->
+      <div
+        id="statusModal"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50"
+      >
+        <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+          <h3 class="text-lg font-semibold mb-4">
+            Atualizar Status do Agendamento
+          </h3>
+
+          <form id="statusForm">
+            <input type="hidden" id="modalAppointmentId" />
+            <input type="hidden" id="modalProjectId" />
+
+            <!-- Informações do Agendamento -->
+            <div class="mb-4 bg-gray-50 p-3 rounded">
+              <div class="text-sm">
+                <p><strong>ID:</strong> <span id="modalDisplayId"></span></p>
+                <p>
+                  <strong>Cliente:</strong>
+                  <span id="modalDisplayClient"></span>
+                </p>
+                <p>
+                  <strong>Projeto:</strong>
+                  <span id="modalDisplayProject"></span>
+                </p>
+              </div>
+            </div>
+
+            <!-- Novo Status -->
+            <div class="mb-4">
+              <label for="newStatus" class="block text-gray-700">
+                Novo Status <span class="text-red-500">*</span>
+              </label>
+              <select
+                id="newStatus"
+                name="status"
+                required
+                class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">Selecione o status</option>
+                <option value="ENVIADO">ENVIADO</option>
+              </select>
+              <p class="text-xs text-gray-500 mt-1">
+                Status "ENVIADO" irá automaticamente registrar a data de envio.
+              </p>
+            </div>
+
+            <!-- Informações de Cálculo -->
+            <div class="mb-4 bg-blue-50 p-3 rounded text-sm">
+              <h4 class="font-semibold text-blue-800 mb-2">
+                Informações Automáticas:
+              </h4>
+              <ul class="text-blue-700 space-y-1">
+                <li>• Prazo limite: 3 dias úteis após aprovação do projeto</li>
+                <li>
+                  • Data de envio: preenchida automaticamente se status =
+                  "ENVIADO"
+                </li>
+                <li>
+                  • Observações do projetista: copiadas da planilha de projetos
+                </li>
+              </ul>
+            </div>
+
+            <!-- Ações do Modal -->
+            <div class="flex items-center justify-between pt-4 border-t">
+              <button
+                type="button"
+                id="cancelModalBtn"
+                class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                id="updateStatusBtn"
+                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                disabled
+              >
+                Atualizar Status
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div
+      id="loadingOverlay"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50"
+    >
+      <div class="bg-white p-6 rounded-lg shadow-lg">
+        <div class="flex items-center space-x-3">
+          <div
+            class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"
+          ></div>
+          <span class="text-gray-700">Processando...</span>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      $(document).ready(function () {
+        // Elementos do DOM
+        const $searchFilter = $("#searchFilter");
+        const $statusFilter = $("#statusFilter");
+        const $teamFilter = $("#teamFilter");
+        const $appointmentsTableBody = $("#appointmentsTableBody");
+        const $appointmentCount = $("#appointmentCount");
+        const $noAppointments = $("#noAppointments");
+        const $statusModal = $("#statusModal");
+        const $statusForm = $("#statusForm");
+        const $loadingOverlay = $("#loadingOverlay");
+        const $newStatus = $("#newStatus");
+        const $updateStatusBtn = $("#updateStatusBtn");
+        const $cancelModalBtn = $("#cancelModalBtn");
+
+        // Variáveis globais
+        let allAppointments = null;
+        let filteredAppointments = [];
+        let teams = [];
+        let listenersConfigured = false;
+
+        // Função para mostrar/esconder loading
+        function showLoading(show = true, message = "Processando...") {
+          if (show) {
+            $loadingOverlay.find("span").text(message);
+            $loadingOverlay.removeClass("hidden");
+          } else {
+            $loadingOverlay.addClass("hidden");
+          }
+        }
+
+        // Função para carregar agendamentos
+        function loadAppointments() {
+          showLoading(true, "Carregando agendamentos...");
+
+          google.script.run
+            .withSuccessHandler((data) => {
+              try {
+                allAppointments = data || [];
+                setupEventListeners();
+                applyFilters();
+              } catch (error) {
+                console.error("Erro ao carregar agendamentos:", error);
+                filteredAppointments = [];
+                alert(
+                  "Erro ao carregar agendamentos. Tente recarregar a página."
+                );
+              } finally {
+                showLoading(false);
+              }
+            })
+            .withFailureHandler((error) => {
+              console.error("Erro ao carregar agendamentos:", error);
+              allAppointments = [];
+              filteredAppointments = [];
+              showLoading(false);
+              alert(
+                "Erro ao carregar agendamentos. Tente recarregar a página."
+              );
+              renderAppointments();
+            })
+            .getAppointmentsForStatusUpdate();
+        }
+
+        // Função para carregar equipes para o filtro
+        function loadTeams() {
+          google.script.run
+            .withSuccessHandler((data) => {
+              teams = data.teams || [];
+              teams.forEach((team) => {
+                $teamFilter.append(`<option value="${team}">${team}</option>`);
+              });
+            })
+            .withFailureHandler((error) => {
+              console.error("Erro ao carregar equipes:", error);
+            })
+            .getPresets();
+        }
+
+        // Função para aplicar filtros
+        function applyFilters() {
+          // Verificar se os dados foram carregados
+          if (!allAppointments || !Array.isArray(allAppointments)) {
+            console.log("Dados ainda não carregados, ignorando filtros");
+            return;
+          }
+
+          const searchTerm = $searchFilter.val().toLowerCase();
+          const statusFilter = $statusFilter.val();
+          const teamFilter = $teamFilter.val();
+
+          filteredAppointments = allAppointments.filter((appointment) => {
+            const matchesSearch =
+              !searchTerm ||
+              appointment.appointmentId.toLowerCase().includes(searchTerm) ||
+              appointment.clientName.toLowerCase().includes(searchTerm) ||
+              appointment.projectName.toLowerCase().includes(searchTerm) ||
+              appointment.projectNumber.toLowerCase().includes(searchTerm);
+
+            const matchesStatus =
+              !statusFilter || appointment.sentStatus === statusFilter;
+            const matchesTeam =
+              !teamFilter || appointment.teamName === teamFilter;
+
+            return matchesSearch && matchesStatus && matchesTeam;
+          });
+
+          renderAppointments();
+        }
+
+        // Função para renderizar agendamentos
+        function renderAppointments() {
+          $appointmentsTableBody.empty();
+
+          if (
+            !filteredAppointments ||
+            !Array.isArray(filteredAppointments) ||
+            filteredAppointments.length === 0
+          ) {
+            $noAppointments.removeClass("hidden");
+            $appointmentCount.text("Nenhum agendamento encontrado.");
+            return;
+          }
+
+          $noAppointments.addClass("hidden");
+          $appointmentCount.text(
+            `${filteredAppointments.length} agendamento(s) encontrado(s)`
+          );
+
+          filteredAppointments.forEach((appointment) => {
+            const startDate = appointment.appointmentStartTime
+              ? new Date(appointment.appointmentStartTime).toLocaleDateString(
+                  "pt-BR"
+                )
+              : "N/A";
+            const startTime = appointment.appointmentStartTime
+              ? new Date(appointment.appointmentStartTime).toLocaleTimeString(
+                  "pt-BR",
+                  { hour: "2-digit", minute: "2-digit" }
+                )
+              : "";
+
+            const statusClass = getStatusClass(appointment.sentStatus);
+            const deadlineClass = getDeadlineClass(
+              appointment.insertionDeadline
+            );
+
+            const row = `
+              <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-gray-900">${
+                    appointment.appointmentId
+                  }</div>
+                  <div class="text-sm text-gray-500">${
+                    appointment.projectNumber || "N/A"
+                  }</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-gray-900">${
+                    appointment.clientName
+                  }</div>
+                  <div class="text-sm text-gray-500">${
+                    appointment.teamName
+                  }</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">${startDate}</div>
+                  <div class="text-sm text-gray-500">${startTime}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">
+                    ${appointment.sentStatus || "PENDENTE"}
+                  </span>
+                  ${
+                    appointment.sentDate
+                      ? `<div class="text-xs text-gray-500 mt-1">Enviado: ${new Date(
+                          appointment.sentDate
+                        ).toLocaleDateString("pt-BR")}</div>`
+                      : ""
+                  }
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm ${deadlineClass}">
+                    ${
+                      appointment.insertionDeadline
+                        ? new Date(
+                            appointment.insertionDeadline
+                          ).toLocaleDateString("pt-BR")
+                        : "A calcular"
+                    }
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <button
+                    onclick="openStatusModal('${appointment.appointmentId}', '${
+              appointment.projectId
+            }', '${appointment.clientName}', '${appointment.projectName}')"
+                    class="text-blue-600 hover:text-blue-900 mr-2"
+                  >
+                    Atualizar Status
+                  </button>
+                </td>
+              </tr>
+            `;
+            $appointmentsTableBody.append(row);
+          });
+        }
+
+        // Função para obter classe CSS do status
+        function getStatusClass(status) {
+          switch (status) {
+            case "ENVIADO":
+              return "bg-green-100 text-green-800";
+            case "CANCELADO":
+              return "bg-red-100 text-red-800";
+            case "PENDENTE":
+            default:
+              return "bg-yellow-100 text-yellow-800";
+          }
+        }
+
+        // Função para obter classe CSS do prazo
+        function getDeadlineClass(deadline) {
+          if (!deadline) return "text-gray-500";
+
+          const deadlineDate = new Date(deadline);
+          const today = new Date();
+          const diffTime = deadlineDate - today;
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+          if (diffDays < 0) return "text-red-600 font-semibold"; // Vencido
+          if (diffDays <= 1) return "text-orange-600 font-semibold"; // Próximo do vencimento
+          return "text-gray-900"; // Normal
+        }
+
+        // Função para abrir modal de status
+        window.openStatusModal = function (
+          appointmentId,
+          projectId,
+          clientName,
+          projectName
+        ) {
+          $("#modalAppointmentId").val(appointmentId);
+          $("#modalProjectId").val(projectId);
+          $("#modalDisplayId").text(appointmentId);
+          $("#modalDisplayClient").text(clientName);
+          $("#modalDisplayProject").text(projectName);
+
+          // Limpar formulário
+          $newStatus.val("");
+          validateStatusForm();
+
+          $statusModal.removeClass("hidden");
+        };
+
+        // Função para validar formulário de status
+        function validateStatusForm() {
+          const isValid = $newStatus.val() !== "";
+          $updateStatusBtn.prop("disabled", !isValid);
+          return isValid;
+        }
+
+        // Função para configurar event listeners
+        function setupEventListeners() {
+          if (listenersConfigured) return; // Evitar duplicação
+
+          $searchFilter.on("input", applyFilters);
+          $statusFilter.on("change", applyFilters);
+          $teamFilter.on("change", applyFilters);
+          $newStatus.on("change", validateStatusForm);
+
+          listenersConfigured = true;
+        }
+
+        // Fechar modal
+        $cancelModalBtn.on("click", function () {
+          $statusModal.addClass("hidden");
+        });
+
+        // Submit do formulário de status
+        $statusForm.on("submit", function (e) {
+          e.preventDefault();
+
+          if (!validateStatusForm()) {
+            alert("Por favor, selecione um status.");
+            return;
+          }
+
+          $updateStatusBtn.prop("disabled", true);
+          showLoading(true, "Atualizando status...");
+
+          const statusData = {
+            appointmentId: $("#modalAppointmentId").val(),
+            projectId: $("#modalProjectId").val(),
+            status: $newStatus.val(),
+          };
+
+          google.script.run
+            .withSuccessHandler((result) => {
+              showLoading(false);
+              alert(
+                `Status atualizado com sucesso!\nID: ${result.appointmentId}\nStatus: ${result.status}`
+              );
+              $statusModal.addClass("hidden");
+              loadAppointments(); // Recarregar dados
+            })
+            .withFailureHandler((error) => {
+              console.error("Erro ao atualizar status:", error);
+              alert(`Erro ao atualizar status:\n${error.message || error}`);
+              showLoading(false);
+              $updateStatusBtn.prop("disabled", false);
+            })
+            .updateAppointmentStatus(statusData);
+        });
+
+        // Inicializar aplicação
+        loadAppointments();
+        loadTeams();
+      });
+    </script>
+  </body>
+</html>

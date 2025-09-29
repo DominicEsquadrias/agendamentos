@@ -6,6 +6,8 @@ Sistema integrado de agendamentos que conecta projetos aprovados com o Google Ag
 
 ### ✅ Implementado
 
+#### 📝 Criação de Agendamentos
+
 - **Interface Web Moderna**: Formulário HTML responsivo com Tailwind CSS
 - **Integração com Projetos**: Carrega automaticamente projetos aprovados da planilha PROJETOS
 - **Validação de Endereços**: Valida endereços usando Google Maps API
@@ -18,23 +20,51 @@ Sistema integrado de agendamentos que conecta projetos aprovados com o Google Ag
 - **🔙 Rollback Automático**: Desfaz operações em caso de falha para manter integridade
 - **✅ Verificação de Integridade**: Verifica consistência entre planilha e calendários
 - **🔧 Correção Automática**: Recria eventos ausentes automaticamente
+- **📤 Inserção no Início**: Novos agendamentos são inseridos no topo da planilha
+
+#### 📊 Atualização de Status
+
+- **Interface de Gerenciamento**: Formulário dedicado para atualizar status dos agendamentos
+- **Filtros Avançados**: Busca por ID, cliente, projeto e filtros por status/equipe
+- **Cálculo Automático de Prazos**: Data limite calculada automaticamente (3 dias úteis)
+- **Integração com Projetos**: Observações do projetista copiadas automaticamente
+- **Data de Envio Automática**: Registra data/hora quando status = "ENVIADO"
+- **Visual de Prazos**: Indicadores visuais para prazos vencidos e próximos do vencimento
+- **Preenchimento Completo**: Preenche colunas P16-S19 automaticamente
+
+#### 💬 Feedback de Projetos
+
+- **Registro de Feedback**: Interface dedicada para registrar feedback dos clientes
+- **Tipos de Feedback**: POSITIVO, NEGATIVO, SEM RETORNO
+- **Validação Condicional**: ID de retorno obrigatório apenas para feedback NEGATIVO
+- **Restrição de Acesso**: Apenas agendamentos com status "ENVIADO" podem receber feedback
+- **Datas Automáticas**: Registro automático de datas de feedback e retorno
+- **Regras de Finalização**: Data de finalização baseada no tipo de feedback
+- **Filtros Inteligentes**: Busca e filtros por feedback, equipe e projeto
+- **Observações**: Campo livre para observações sobre o feedback
+- **Validação de IDs**: Validação do formato AGT-xxxxxxxx para IDs de retorno
 
 ### 🔄 Em Desenvolvimento
 
-- Gerenciamento de agendamentos existentes
 - Exclusão de agendamentos
 - Relatórios de agendamentos
+- Notificações automáticas
 
 ## 📋 Estrutura do Sistema
 
 ### Arquivos Principais
 
 - **`src/agendamentos.html`**: Interface web para criação de agendamentos
+- **`src/agendamentos_status.html`**: Interface web para atualização de status
+- **`src/agendamentos_feedback.html`**: Interface web para registro de feedback
+- **`src/agendamentos_managment.js`**: Funções de gerenciamento de agendamentos
 - **`src/utils.js`**: Funções utilitárias e lógica de negócio
 - **`src/GLOBAL_CONST.js`**: Constantes globais e mapeamento de colunas
-- **`src/googleCalendar.js`**: Funções existentes para manipulação de calendários
+- **`src/appsscript.json`**: Configuração do projeto e macros
 
-### Colunas da Planilha (A-O)
+### Colunas da Planilha
+
+#### Colunas Principais (A-O)
 
 | Coluna | Campo                   | Descrição                                   |
 | ------ | ----------------------- | ------------------------------------------- |
@@ -53,6 +83,47 @@ Sistema integrado de agendamentos que conecta projetos aprovados com o Google Ag
 | M      | APPOINTMENT_START_TIME  | Data/hora de início                         |
 | N      | APPOINTMENT_END_TIME    | Data/hora de término                        |
 | O      | APPOINTMENT_CALENDAR_ID | ID do evento no Google Agenda               |
+
+#### Colunas de Status e Controle (P-S)
+
+| Coluna | Campo                          | Descrição                                        |
+| ------ | ------------------------------ | ------------------------------------------------ |
+| P      | APPOINTMENT_SENT_STATUS        | Status do envio (ENVIADO ou vazio)               |
+| Q      | APPOINTMENT_INSERTION_DEADLINE | Data limite para realização (3 dias úteis)       |
+| R      | APPOINTMENT_SENT_DATE          | Data/hora do envio (automático se ENVIADO)       |
+| S      | PROJECT_OBS                    | Observações do projetista (da planilha projetos) |
+
+#### Colunas de Feedback (T-Y)
+
+| Coluna | Campo                        | Descrição                                        |
+| ------ | ---------------------------- | ------------------------------------------------ |
+| T      | PROJECT_FEEDBACK             | Tipo de feedback (POSITIVO/NEGATIVO/SEM RETORNO) |
+| U      | PROJECT_RETURN_FEEDBACK      | ID do agendamento de retorno (só para NEGATIVO)  |
+| V      | PROJECT_DEADLINE             | Data de finalização do projeto                   |
+| W      | OBS                          | Observações sobre o feedback                     |
+| X      | PROJECT_FEEDBACK_DATE        | Data de registro do feedback (automático)        |
+| Y      | PROJECT_FEEDBACK_RETURN_DATE | Data de registro do retorno (automático)         |
+
+#### Regras de Preenchimento
+
+##### Status (P-S)
+
+- **Coluna P16**: Preenchida manualmente através do formulário de status
+- **Coluna Q17**: Calculada automaticamente (data de aprovação + 3 dias úteis)
+- **Coluna R18**: Preenchida automaticamente quando status = "ENVIADO"
+- **Coluna S19**: Copiada automaticamente da planilha de projetos (coluna L)
+
+##### Feedback (T-Y)
+
+- **Restrição**: Apenas agendamentos com status "ENVIADO" (P16) podem receber feedback
+- **Coluna T20**: Preenchida manualmente (POSITIVO/NEGATIVO/SEM RETORNO)
+- **Coluna U21**: Obrigatória apenas para feedback NEGATIVO
+- **Coluna V22**: Preenchida automaticamente conforme regras:
+  - POSITIVO ou SEM RETORNO: data atual
+  - NEGATIVO: apenas se U21 estiver preenchido
+- **Coluna W23**: Campo livre para observações
+- **Coluna X24**: Preenchida automaticamente quando T20 é definido
+- **Coluna Y25**: Preenchida automaticamente quando U21 é definido
 
 ## 🗓️ Calendários Integrados
 
@@ -74,7 +145,12 @@ Sistema integrado de agendamentos que conecta projetos aprovados com o Google Ag
 
 ### 1. Acessar o Sistema
 
-No Google Sheets, clique no menu **🗓️ Agendamentos** → **🔄 Criar Agendamentos**
+No Google Sheets, acesse o menu **🗓️ Agendamentos** com as seguintes opções:
+
+- **🗓️ Criar Agendamentos**: Formulário para novos agendamentos
+- **📝 Adicionar Status de Agendamento**: Atualizar status de envio
+- **💬 Registrar Feedback de Projetos**: Registrar feedback dos clientes
+- **🗑️ Excluir Agendamentos**: Deletar agendamentos
 
 ### 2. Preencher Formulário
 

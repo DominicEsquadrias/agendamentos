@@ -95,4 +95,12 @@ const COLUMNS = {
     letter: "W",
     number: 23,
   },
+  PROJECT_FEEDBACK_DATE: {
+    letter: "X",
+    number: 24,
+  },
+  PROJECT_FEEDBACK_RETURN_DATE: {
+    letter: "Y",
+    number: 25,
+  },
 };
