@@ -218,18 +218,6 @@ function getAppointmentPresets() {
 }
 
 /**
- * Encontra a próxima linha disponível na planilha de agendamentos.
- *
- * @since 1.0.0
- * @author Lucas Vieira
- * @returns {number} Número da próxima linha disponível
- */
-function findNextAvailableRow() {
-  const lastRow = shAGENDAMENTOS.getLastRow();
-  return Math.max(lastRow + 1, START_ROW);
-}
-
-/**
  * Calcula a data de prazo limite baseada em dias úteis a partir de uma data inicial.
  *
  * @since 1.0.0
